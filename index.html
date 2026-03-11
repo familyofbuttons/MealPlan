@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Meal Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="style.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logo">🍽️</div>
+        <div class="brand-text">
+          <h1>Meal Planner</h1>
+          <span>Plan your week in colour</span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="month">Month</button>
+          <button class="view-btn" data-view="week">Week</button>
+        </div>
+
+        <div class="nav-controls">
+          <button id="prevBtn" class="nav-btn">◀</button>
+          <div class="current-label">
+            <span id="currentLabel"></span>
+          </div>
+          <button id="nextBtn" class="nav-btn">▶</button>
+        </div>
+
+        <button id="todayBtn" class="pill-btn">Today</button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <aside class="side-panel">
+        <div class="side-panel-header">
+          <h2>Quick add</h2>
+          <p>Add a meal to the selected day</p>
+        </div>
+
+        <form id="mealForm" class="meal-form">
+          <label class="field">
+            <span>Selected date</span>
+            <input type="text" id="selectedDateDisplay" readonly />
+          </label>
+
+          <label class="field">
+            <span>Meal type</span>
+            <div class="pill-group">
+              <button type="button" class="pill-option active" data-meal-type="lunch">Lunch</button>
+              <button type="button" class="pill-option" data-meal-type="dinner">Dinner</button>
+            </div>
+          </label>
+
+          <label class="field">
+            <span>Title</span>
+            <input type="text" id="mealTitle" required />
+          </label>
+
+          <label class="field">
+            <span>Ingredients (comma separated)</span>
+            <textarea id="mealIngredients" rows="2" placeholder="chicken, garlic, rice"></textarea>
+          </label>
+
+          <label class="field">
+            <span>Method / Notes</span>
+            <textarea id="mealNotes" rows="4"></textarea>
+          </label>
+
+          <label class="field">
+            <span>Image URL</span>
+            <input type="url" id="mealImage" />
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="primary-btn">Save meal</button>
+            <button type="button" id="clearMealBtn" class="ghost-btn">Clear this meal</button>
+          </div>
+        </form>
+
+        <div class="side-panel-footer">
+          <h3>Today’s meals</h3>
+          <div id="todayMeals" class="today-meals"></div>
+        </div>
+
+        <div class="shopping-panel">
+          <h3>Shopping list</h3>
+          <p class="shopping-hint">Ingredients from your meals appear here. Drag to reorder, tick when bought.</p>
+          <div id="shoppingList" class="shopping-list"></div>
+        </div>
+      </aside>
+
+      <section class="calendar-wrapper">
+        <div class="calendar-header-row">
+          <div class="weekday-label weekend">Sun</div>
+          <div class="weekday-label">Mon</div>
+          <div class="weekday-label">Tue</div>
+          <div class="weekday-label">Wed</div>
+          <div class="weekday-label">Thu</div>
+          <div class="weekday-label">Fri</div>
+          <div class="weekday-label weekend">Sat</div>
+        </div>
+
+        <div id="calendarGrid" class="calendar-grid"></div>
+      </section>
+    </main>
+
+    <button id="panelToggle" class="floating-toggle" aria-label="Toggle quick add panel">
+      <span class="toggle-icon">+</span>
+    </button>
+  </div>
+
+  <!-- MODAL -->
+  <div id="mealModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <header class="modal-header">
+        <div>
+          <h2 id="modalTitle"></h2>
+          <span id="modalSubtitle"></span>
+        </div>
+        <button id="closeModalBtn" class="icon-btn">✕</button>
+      </header>
+
+      <div class="modal-body">
+        <div class="modal-image-wrapper" id="modalImageWrapper">
+          <img id="modalImage" alt="" />
+        </div>
+        <div class="modal-text">
+          <h3>Details</h3>
+          <p id="modalNotes"></p>
+
+          <h4 class="modal-subheading">Ingredients</h4>
+          <div id="modalIngredientsList" class="modal-ingredients-list"></div>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button id="deleteMealBtn" class="primary-btn" style="background:linear-gradient(135deg,var(--accent-pink),var(--accent-purple));margin-right:auto;">
+          Delete meal
+        </button>
+        <button id="editInFormBtn" class="primary-btn">Edit in side panel</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

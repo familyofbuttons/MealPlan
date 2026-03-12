@@ -175,7 +175,6 @@ body {
   max-height: 100%;
   overflow-y: auto;
 }
-
 /* QUICK ADD PANEL */
 .side-panel-header h2 {
   margin: 0;
@@ -463,8 +462,7 @@ body {
   flex-direction: column;
   gap: 6px;
 }
-
-/* MEAL SLOTS */
+/* MEAL SLOTS (continued from chunk 2) */
 .meal-slot {
   position: relative;
   border-radius: 12px;
@@ -741,6 +739,10 @@ body.view-week .day-cell {
   .meal-image {
     min-height: 120px;
   }
+}
+#emailShoppingBtn {
+  font-size: 13px;
+  padding: 8px 12px;
 }
 
 @media (max-width: 600px) {

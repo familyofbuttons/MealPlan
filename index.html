@@ -51,7 +51,7 @@
         <form id="mealForm" class="meal-form">
           <label class="field">
             <span>Selected date</span>
-            <input type="text" id="selectedDateDisplay" readonly />
+            <input type="text" id="selectedDateDisplay" value="" readonly />
           </label>
 
           <label class="field">
@@ -93,11 +93,17 @@
           <div id="todayMeals" class="today-meals"></div>
         </div>
 
-        <div class="shopping-panel">
-          <h3>Shopping list</h3>
-          <p class="shopping-hint">Ingredients from your meals appear here. Drag to reorder, tick when bought.</p>
-          <div id="shoppingList" class="shopping-list"></div>
-        </div>
+       <div class="shopping-panel">
+  <h3>Shopping list</h3>
+  <p class="shopping-hint">Ingredients from your meals appear here. Drag to reorder, tick when bought.</p>
+
+  <button id="emailShoppingBtn" class="primary-btn" style="margin-bottom:8px;">
+    Email List To Self
+  </button>
+
+  <div id="shoppingList" class="shopping-list"></div>
+</div>
+
       </aside>
 
       <section class="calendar-wrapper">

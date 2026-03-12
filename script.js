@@ -75,10 +75,7 @@ function saveToStorage() {
 }
 
 function parseIngredients(text) {
-  return text
-    .split(",")
-    .map(s => s.trim())
-    .filter(Boolean);
+  return text.split(",").map(s => s.trim()).filter(Boolean);
 }
 
 function findShoppingItemIndexByName(name) {
@@ -86,7 +83,7 @@ function findShoppingItemIndexByName(name) {
 }
 
 function rebuildShoppingListFromMeals(preserveChecked = true) {
-  const used = new Map(); // name -> {checked, firstIndex}
+  const used = new Map();
   state.shoppingList.forEach((item, index) => {
     if (!used.has(item.name)) {
       used.set(item.name, { checked: item.checked, firstIndex: index });
@@ -96,37 +93,32 @@ function rebuildShoppingListFromMeals(preserveChecked = true) {
   const namesInOrder = [];
   Object.values(state.meals).forEach(dayMeals => {
     Object.values(dayMeals).forEach(meal => {
-      if (meal && Array.isArray(meal.ingredients)) {
+      if (meal?.ingredients) {
         meal.ingredients.forEach(name => {
-          if (!namesInOrder.includes(name)) {
-            namesInOrder.push(name);
-          }
+          if (!namesInOrder.includes(name)) namesInOrder.push(name);
         });
       }
     });
   });
 
-  const newList = [];
-  namesInOrder.forEach(name => {
+  const newList = namesInOrder.map(name => {
     const existing = used.get(name);
-    newList.push({
+    return {
       id: existing ? `${name}-${existing.firstIndex}` : `${name}-${Date.now()}-${Math.random()}`,
       name,
       checked: preserveChecked && existing ? existing.checked : false
-    });
+    };
   });
 
   state.shoppingList = newList;
   saveToStorage();
 }
-
 // ------------------------------
-// MEAL TYPE TOGGLE (Simple)
+// MEAL TYPE TOGGLE
 // ------------------------------
 document.querySelectorAll(".pill-option").forEach(btn => {
   btn.addEventListener("click", () => {
-    const type = btn.dataset.mealType;
-    setSelectedMealType(type);
+    setSelectedMealType(btn.dataset.mealType);
   });
 });
 
@@ -138,9 +130,7 @@ document.getElementById("mealForm").addEventListener("submit", e => {
   saveMeal();
 });
 
-document.getElementById("clearMealBtn").addEventListener("click", () => {
-  clearMeal();
-});
+document.getElementById("clearMealBtn").addEventListener("click", clearMeal);
 
 function saveMeal() {
   const key = getMealKey(state.selectedDate);
@@ -176,9 +166,7 @@ function clearMeal() {
   const key = getMealKey(state.selectedDate);
   const type = document.querySelector(".pill-option.active").dataset.mealType;
 
-  if (state.meals[key] && state.meals[key][type]) {
-    delete state.meals[key][type];
-  }
+  if (state.meals[key]?.[type]) delete state.meals[key][type];
 
   mealTitleInput.value = "";
   mealNotesInput.value = "";
@@ -206,11 +194,7 @@ document.getElementById("editInFormBtn").addEventListener("click", () => {
 document.getElementById("deleteMealBtn").addEventListener("click", () => {
   const key = getMealKey(state.selectedDate);
   const type = document.querySelector(".pill-option.active").dataset.mealType;
-
-  if (state.meals[key] && state.meals[key][type]) {
-    delete state.meals[key][type];
-  }
-
+  if (state.meals[key]?.[type]) delete state.meals[key][type];
   rebuildShoppingListFromMeals(true);
   saveToStorage();
   modal.classList.add("hidden");
@@ -219,8 +203,7 @@ document.getElementById("deleteMealBtn").addEventListener("click", () => {
 
 function renderModalIngredients(meal) {
   modalIngredientsList.innerHTML = "";
-
-  if (!meal.ingredients || meal.ingredients.length === 0) {
+  if (!meal.ingredients?.length) {
     const empty = document.createElement("div");
     empty.textContent = "No ingredients listed.";
     empty.style.fontSize = "12px";
@@ -237,9 +220,7 @@ function renderModalIngredients(meal) {
     checkbox.type = "checkbox";
 
     const idx = findShoppingItemIndexByName(name);
-    if (idx !== -1) {
-      checkbox.checked = state.shoppingList[idx].checked;
-    }
+    if (idx !== -1) checkbox.checked = state.shoppingList[idx].checked;
 
     checkbox.addEventListener("change", () => {
       const index = findShoppingItemIndexByName(name);
@@ -260,7 +241,7 @@ function renderModalIngredients(meal) {
 }
 
 function openMealModal(date, type, meal) {
-  modalTitle.textContent = meal.title;
+  modalTitle.textContent = meal.title || "New meal";
   modalSubtitle.textContent = `${type.toUpperCase()} • ${date.toDateString()}`;
   modalNotes.textContent = meal.notes || "";
 
@@ -281,7 +262,6 @@ function openMealModal(date, type, meal) {
   renderModalIngredients(meal);
   modal.classList.remove("hidden");
 }
-
 // ------------------------------
 // VIEW SWITCHING
 // ------------------------------
@@ -289,7 +269,6 @@ document.querySelectorAll(".view-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-
     state.view = btn.dataset.view;
     render();
   });
@@ -299,20 +278,14 @@ document.querySelectorAll(".view-btn").forEach(btn => {
 // NAVIGATION
 // ------------------------------
 document.getElementById("prevBtn").addEventListener("click", () => {
-  if (state.view === "month") {
-    state.currentDate.setMonth(state.currentDate.getMonth() - 1);
-  } else {
-    state.selectedDate.setDate(state.selectedDate.getDate() - 7);
-  }
+  if (state.view === "month") state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+  else state.selectedDate.setDate(state.selectedDate.getDate() - 7);
   render();
 });
 
 document.getElementById("nextBtn").addEventListener("click", () => {
-  if (state.view === "month") {
-    state.currentDate.setMonth(state.currentDate.getMonth() + 1);
-  } else {
-    state.selectedDate.setDate(state.selectedDate.getDate() + 7);
-  }
+  if (state.view === "month") state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+  else state.selectedDate.setDate(state.selectedDate.getDate() + 7);
   render();
 });
 
@@ -324,18 +297,27 @@ document.getElementById("todayBtn").addEventListener("click", () => {
 });
 
 // ------------------------------
-// RENDER CONTROLLER
+// TODAY MEALS
 // ------------------------------
-function render() {
-  document.body.classList.remove("view-month", "view-week");
-  document.body.classList.add(`view-${state.view}`);
+function renderTodayMeals() {
+  todayMealsContainer.innerHTML = "";
+  const key = getMealKey(new Date());
+  const meals = state.meals[key];
+  if (!meals) return;
 
-  if (state.view === "month") renderMonth();
-  else renderWeek();
+  Object.entries(meals).forEach(([type, meal]) => {
+    const div = document.createElement("div");
+    div.textContent = `${type.toUpperCase()}: ${meal.title}`;
+    div.style.cursor = "pointer";
 
-  selectedDateDisplay.value = state.selectedDate.toDateString();
-  renderTodayMeals();
-  renderShoppingList();
+    div.addEventListener("click", () => {
+      setSelectedDate(new Date());
+      setSelectedMealType(type);
+      openMealModal(new Date(), type, meal);
+    });
+
+    todayMealsContainer.appendChild(div);
+  });
 }
 
 // ------------------------------
@@ -373,7 +355,7 @@ function buildDayCell(date) {
     slot.className = "meal-slot";
 
     const key = getMealKey(date);
-    const meal = state.meals[key] ? state.meals[key][type] : null;
+    const meal = state.meals[key]?.[type];
 
     if (meal) {
       slot.classList.add("has-meal");
@@ -381,7 +363,6 @@ function buildDayCell(date) {
       const img = document.createElement("div");
       img.className = "meal-image";
       img.style.backgroundImage = meal.image ? `url('${meal.image}')` : "none";
-      slot.appendChild(img);
 
       const overlay = document.createElement("div");
       overlay.className = "meal-overlay";
@@ -396,6 +377,7 @@ function buildDayCell(date) {
 
       overlay.appendChild(tag);
       overlay.appendChild(title);
+      slot.appendChild(img);
       slot.appendChild(overlay);
 
       slot.addEventListener("click", e => {
@@ -440,7 +422,6 @@ function buildDayCell(date) {
   cell.appendChild(body);
   return cell;
 }
-
 // ------------------------------
 // MONTH VIEW
 // ------------------------------
@@ -491,7 +472,7 @@ function renderMonth() {
 }
 
 // ------------------------------
-// WEEK VIEW (Monday start)
+// WEEK VIEW
 // ------------------------------
 function renderWeek() {
   calendarGrid.innerHTML = "";
@@ -512,34 +493,24 @@ function renderWeek() {
     calendarGrid.appendChild(cell);
   }
 }
-
 // ------------------------------
-// TODAY MEALS
+// RENDER
 // ------------------------------
-function renderTodayMeals() {
-  todayMealsContainer.innerHTML = "";
-  const key = getMealKey(new Date());
-  const meals = state.meals[key];
+function render() {
+  document.body.classList.toggle("view-week", state.view === "week");
 
-  if (!meals) return;
+  if (state.view === "month") {
+    renderMonth();
+  } else {
+    renderWeek();
+  }
 
-  Object.entries(meals).forEach(([type, meal]) => {
-    const div = document.createElement("div");
-    div.textContent = `${type.toUpperCase()}: ${meal.title}`;
-    div.style.cursor = "pointer";
-
-    div.addEventListener("click", () => {
-      setSelectedDate(new Date());
-      setSelectedMealType(type);
-      openMealModal(new Date(), type, meal);
-    });
-
-    todayMealsContainer.appendChild(div);
-  });
+  setSelectedDate(state.selectedDate);
+  renderTodayMeals();
+  renderShoppingList();
 }
-
 // ------------------------------
-// SHOPPING LIST RENDER + LOGIC
+// SHOPPING LIST
 // ------------------------------
 let dragSourceIndex = null;
 
@@ -625,6 +596,25 @@ function renderShoppingList() {
     shoppingListContainer.appendChild(row);
   });
 }
+// ------------------------------
+// EMAIL SHOPPING LIST (UNCHECKED ONLY)
+// ------------------------------
+document.getElementById("emailShoppingBtn").addEventListener("click", () => {
+  const unchecked = state.shoppingList
+    .filter(item => !item.checked)
+    .map(item => `• ${item.name}`);
+
+  if (unchecked.length === 0) {
+    alert("All items are checked — nothing to email!");
+    return;
+  }
+
+  const subject = encodeURIComponent("Shopping List");
+  const body = encodeURIComponent(unchecked.join("\n"));
+
+  // Opens the user's email app with pre-filled content
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+});
 
 // ------------------------------
 // AUTO-ADVANCE AT MIDNIGHT
@@ -638,19 +628,8 @@ setInterval(() => {
   if (todayString !== lastDateCheck) {
     lastDateCheck = todayString;
 
-    const day = now.getDay();
-    const date = now.getDate();
-
     state.selectedDate = new Date(now);
     state.currentDate = new Date(now);
-
-    if (state.view === "week" && day === 0) {
-      state.selectedDate.setDate(state.selectedDate.getDate() + 1);
-    }
-
-    if (state.view === "month" && date === 1) {
-      // currentDate already set to today
-    }
 
     render();
   }

@@ -478,12 +478,16 @@ function renderWeek() {
   calendarGrid.innerHTML = "";
 
   const selected = new Date(state.selectedDate);
-  const day = selected.getDay();
-  const diff = (day === 0 ? -6 : 1) - day;
-  const weekStart = new Date(selected);
-  weekStart.setDate(selected.getDate() + diff);
+  const day = selected.getDay(); // 0 = Sunday, 1 = Monday, ... 6 = Saturday
 
-  currentLabel.textContent = `Week of ${weekStart.toDateString()}`;
+  // For a week that starts on Sunday, subtract the current weekday number
+  const weekStart = new Date(selected);
+  weekStart.setDate(selected.getDate() - day);
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  currentLabel.textContent = `Week of ${weekStart.toDateString()} - ${weekEnd.toDateString()}`;
 
   for (let i = 0; i < 7; i++) {
     const date = new Date(weekStart);
@@ -641,3 +645,9 @@ setInterval(() => {
 document.body.classList.add("panel-open");
 rebuildShoppingListFromMeals(true);
 render();
+// Optional: register service worker (adjust path if needed)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/mealplan/sw.js')
+    .then(reg => console.log('Service worker registered:', reg.scope))
+    .catch(err => console.warn('Service worker registration failed:', err));
+}
